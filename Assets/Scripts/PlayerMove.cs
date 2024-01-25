@@ -31,6 +31,10 @@ public class PlayerMove : MonoBehaviour {
             rigid.velocity = new Vector2(rigid.velocity.x, jumpPower);
             anim.SetBool(isJumping, true);
         }
+
+        if (Input.GetMouseButtonDown(0)) {
+            anim.SetTrigger("attack");
+        }
     }
 
     private void FixedUpdate() {
