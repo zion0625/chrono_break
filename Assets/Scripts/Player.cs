@@ -3,13 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMove : MonoBehaviour {
+public class Player : MonoBehaviour {
     [Header("Move")]
     [SerializeField]private int speed;
     private float axis;
     
     [Header("Jump")]
     [SerializeField] private float jumpPower;
+
+    private int comboCount;
 
     private Animator anim;
     private Rigidbody2D rigid;
@@ -25,20 +27,28 @@ public class PlayerMove : MonoBehaviour {
     void Update() {
         axis = Input.GetAxisRaw("Horizontal");
         anim.SetInteger("speed", (int)axis);
-        spr.flipX = axis < 0;
+        
+        if(Input.GetButton("Horizontal"))
+            spr.flipX = axis == -1;
         
         if (Input.GetButtonDown("Jump") && !anim.GetBool(isJumping)) {
             rigid.velocity = new Vector2(rigid.velocity.x, jumpPower);
             anim.SetBool(isJumping, true);
         }
 
-        if (Input.GetMouseButtonDown(0)) {
-            anim.SetTrigger("attack");
+        if (Input.GetMouseButtonDown(0) && !anim.GetBool("attacking")) {
+            if (comboCount >= 3)
+                comboCount = 0;
+            comboCount++;
+            anim.SetTrigger("atk");
+            anim.SetBool("attacking", true);
+            anim.SetFloat("comboCount", comboCount);
         }
     }
 
     private void FixedUpdate() {
-        rigid.velocity = new Vector2(axis * speed, rigid.velocity.y);
+        rigid.AddForce(Vector2.right * axis, ForceMode2D.Impulse);
+        //rigid.velocity = new Vector2(Mathf.Clamp(rigid.velocity.x, -speed, speed) ,rigid.velocity.y);
     }
     
     private void OnCollisionEnter2D(Collision2D other)
@@ -50,5 +60,10 @@ public class PlayerMove : MonoBehaviour {
             anim.SetBool(isJumping, false);
             rigid.velocity = new Vector2(rigid.velocity.x, 0);
         }
+    }
+    
+    public void OnFinishedAttack()
+    {
+        anim.SetBool("attacking", false);
     }
 }
