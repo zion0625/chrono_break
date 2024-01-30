@@ -17,16 +17,20 @@ public class Player : MonoBehaviour {
     private Rigidbody2D rigid;
     private SpriteRenderer spr;
     private static readonly int isJumping = Animator.StringToHash("isJumping");
+    
+    float objectTimeScale = 0.2f;
 
     void Start() {
         rigid = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         spr = GetComponent<SpriteRenderer>();
+        Time.timeScale = 0;
     }
 
     void Update() {
         axis = Input.GetAxisRaw("Horizontal");
         anim.SetInteger("speed", (int)axis);
+        transform.Translate(Vector2.right * (axis * speed * Time.unscaledDeltaTime));
         
         if(Input.GetButton("Horizontal"))
             spr.flipX = axis == -1;
@@ -44,11 +48,6 @@ public class Player : MonoBehaviour {
             anim.SetBool("attacking", true);
             anim.SetFloat("comboCount", comboCount);
         }
-    }
-
-    private void FixedUpdate() {
-        rigid.AddForce(Vector2.right * axis, ForceMode2D.Impulse);
-        //rigid.velocity = new Vector2(Mathf.Clamp(rigid.velocity.x, -speed, speed) ,rigid.velocity.y);
     }
     
     private void OnCollisionEnter2D(Collision2D other)
